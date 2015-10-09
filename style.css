@@ -4,6 +4,9 @@
 	display:block;
 }
 
+.topdiv{
+	position:absolute;
+}
 .columntop{
 	z-index: -1;
 	height: 96px;

@@ -9,7 +9,7 @@
 ♧ red club suit &#9831
 */
 
-
+var board = [[],[],[],[],[],[],[],[]];
 var validCardMoveTarget = false; //will either be false or the div the card has moved to.
 
 function dragStart(event, ui){
@@ -94,8 +94,49 @@ $(function(){
 });
 
 function pageload(){
+	placeBaseElements();
+	setBoard();
+
+}
+
+function placeBaseElements(){
+	//setup extra tray
+	for(var i = 0; i<4; i++){
+		var left = (i*100)+"px";
+		var top = "0px"
+		$("#extra"+i).css({"left":left, "top":top});
+	}	
+	//setup win tray
+	for(var i = 0; i<4; i++){
+		var left = 400+(i*100)+"px";
+		var top = "0px"
+		$("#win"+i).css({"left":left, "top":top});
+	}	
+
+	//setup main columns
 	for(var i = 0; i<8; i++){
 		var left = (i*100)+"px";
-		$("#col"+i).css({"left":left});
+		var top = "150px"
+		$("#col"+i).css({"left":left, "top":top});
 	}
+}
+
+function setBoard(){
+	var deck = shuffleDeck();
+	for(var i=0; i<52;i++){
+		board[i%8].push(deck[i]);
+	}
+}
+
+function shuffleDeck(){
+	var newdeck = [];
+	var deck = [];
+	for(var i=0; i<52; i++){
+		newdeck.push(i);
+	}
+	while(newdeck.length>0){
+		var index = Math.floor(Math.random()*newdeck.length);
+		deck.push(newdeck.splice(index, 1)[0]);
+	}
+	return deck;
 }
