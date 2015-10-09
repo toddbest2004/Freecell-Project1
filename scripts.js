@@ -23,7 +23,7 @@ function dragStart(event, ui){
 	}
 
 	//when a card starts dragging, find all eligible drop locations and add droppable
-	$("#newparenttest, #newparenttest2").droppable({
+	$(".columntop").droppable({
 		activate: function(event, ui){droppableDragStarted(event,ui);},
 		deactivate: function(event, ui){droppableDragEnded(event,ui);},
 		drop: function(event, ui){droppableDragDropped(event,ui);},
@@ -85,11 +85,13 @@ function highlightOff(div){
 
 $(function(){
 	//temporary position setup for divs
-	$("#newparenttest2").css({left:"600px"});
-	$("#newparenttest").css({left:"300px"});
 
 	$('.carddiv').draggable({
 		start: function(event, ui){dragStart(event, ui);},
 		stop: function(event, ui){dragStop(event, ui);},
 		});
 });
+
+function pageload(){
+
+}

@@ -10,12 +10,12 @@
 }
 .columntop{
 	z-index: -1;
-	position:absolute;
-	height:200px;
-	width: 200px;
+	height: 96px;
+	width: 71px;
+	position: absolute;
 }
 
 .bottomdiv{
-	height:200px;
+	height:96px;
 }
 
