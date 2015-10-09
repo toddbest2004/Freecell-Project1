@@ -96,7 +96,7 @@ $(function(){
 function pageload(){
 	placeBaseElements();
 	setBoard();
-
+	placeCards();
 }
 
 function placeBaseElements(){
@@ -139,4 +139,65 @@ function shuffleDeck(){
 		deck.push(newdeck.splice(index, 1)[0]);
 	}
 	return deck;
+}
+
+function placeCards(){
+	var parent;
+	for(var i=0; i<8;i++){
+		parent=$("#col"+i);
+		for(var j=0; j<board[i].length;j++){
+			var cardId = board[i][j];
+			var cardDiv = $("<div></div>").attr("id",cardId);
+			var img;
+			if(j===(board[i].length-1)){
+				cardDiv.addClass("carddiv");
+				console.log(i+":"+j+":"+board[i].length);
+				img = $("<img>").attr("src", "images/"+idToCard(cardId)+".png");
+			}else{
+				img = $("<img>").attr("src", "images/"+idToCard(cardId)+"h.png");
+			}
+			cardDiv.append(img);
+			parent.append(cardDiv);
+			parent = parent.children("div").first();
+		}
+	}
+}
+
+function idToCard(id){
+	return getSuit(id)+getPips(id);
+}
+
+function getSuit(id){
+	var suit = Math.floor(id/13);
+	switch(suit){
+		case 0:
+			suit = "c"
+			break;
+		case 1:
+			suit = "d"
+			break;
+		case 2:
+			suit = "s"
+			break;
+		case 3:
+			suit = "h"
+			break;
+	}
+	return suit;
+}
+
+function getPips(id){
+	var pips = id%13+1;
+	switch(pips){
+		case 11:
+			pips = "j"
+			break;
+		case 12:
+			pips = "q"
+			break;
+		case 13:
+			pips = "k"
+			break;
+	}
+	return pips;
 }
