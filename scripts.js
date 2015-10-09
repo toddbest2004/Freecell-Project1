@@ -58,12 +58,12 @@ function dragStop(event, ui){
 
 function droppableDragStarted(event, ui){
 	//find all targets for the currently dragged card, highlight them
-	$(event.target).css("backgroundColor","blue");
+	highlightOn(event.target);
 }
 
 function droppableDragEnded(event, ui){
 	//card has been dropped, remove highlighting and listeners
-	$(event.target).css("backgroundColor","white");
+	highlightOff(event.target);
 	//$(event.target).droppable("destroy");
 }
 
@@ -73,6 +73,14 @@ function droppableDragDropped(event, ui){
 	validCardMoveTarget = event.target;
 	//the card has been dropped on an approved droppable
 	//console.log(validCardMoveTarget);
+}
+
+function highlightOn(div){
+	$(div).css("backgroundColor","blue");
+}
+
+function highlightOff(div){
+	$(div).css("backgroundColor","white");
 }
 
 $(function(){
