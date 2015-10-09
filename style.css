@@ -1,0 +1,21 @@
+.card, img{
+	margin: 0;
+	padding: 0;
+	display:block;
+}
+
+.topdiv{
+	position:absolute;
+	width: 200px;
+}
+.columntop{
+	z-index: -1;
+	position:absolute;
+	height:200px;
+	width: 200px;
+}
+
+.bottomdiv{
+	height:200px;
+}
+
