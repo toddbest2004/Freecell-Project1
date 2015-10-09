@@ -4,10 +4,6 @@
 	display:block;
 }
 
-.topdiv{
-	position:absolute;
-	width: 200px;
-}
 .columntop{
 	z-index: -1;
 	height: 96px;

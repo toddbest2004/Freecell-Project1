@@ -52,7 +52,7 @@ function dragStop(event, ui){
 	
 	//move card back to original location
 	//or position it properly in new div.
-	card.css({left:-1, top:1});
+	card.css({left:0, top:0});
 	
 }
 
@@ -85,6 +85,7 @@ function highlightOff(div){
 
 $(function(){
 	//temporary position setup for divs
+	pageload();
 
 	$('.carddiv').draggable({
 		start: function(event, ui){dragStart(event, ui);},
@@ -93,5 +94,8 @@ $(function(){
 });
 
 function pageload(){
-
+	for(var i = 0; i<8; i++){
+		var left = (i*100)+"px";
+		$("#col"+i).css({"left":left});
+	}
 }
