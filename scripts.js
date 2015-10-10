@@ -10,15 +10,30 @@
 */
 
 var board = [[],[],[],[],[],[],[],[]];
+var freecells = [null,null,null,null];
+var wintray = [null,null,null,null];
 var validCardMoveTarget = false; //will either be false or the div the card has moved to.
+
+$(function(){
+	//temporary position setup for divs
+	pageload();
+
+	$('.carddiv').draggable({
+		start: function(event, ui){dragStart(event, ui);},
+		stop: function(event, ui){dragStop(event, ui);},
+		});
+});
 
 function dragStart(event, ui){
 	//console.log(event);
 	var movingObject = $(event.target);
+	var cardId = movingObject.attr("id");
 	movingObject.addClass("topdiv");
 	//if card is stacked on another card, show the bottom card
-	console.log(movingObject.parent()[0]);
+	//console.log(movingObject.parent()[0]);
+	//TODO: make function exposeCard: add classes, show images, etc.
 	if(!movingObject.parent().hasClass("columntop")){
+
 		movingObject.parent().addClass("bottomdiv");
 	}
 
@@ -47,6 +62,12 @@ function dragStop(event, ui){
 	}
 
 	if(card.parent().hasClass("bottomdiv")){
+		//TODO: find a better way to make an image half
+		//TODO: function hideCard(): remove classes, change image, etc.
+		var id = card.parent().attr("id");
+		var imgElement = card.parent().children("img").first();
+		halfCard(imgElement, id);
+
 		card.parent().removeClass("bottomdiv");
 	}
 	
@@ -54,6 +75,14 @@ function dragStop(event, ui){
 	//or position it properly in new div.
 	card.css({left:0, top:0});
 	
+}
+
+function exposeCard(){
+	
+}
+
+function hideCard(){
+
 }
 
 function droppableDragStarted(event, ui){
@@ -83,16 +112,6 @@ function highlightOff(div){
 	$(div).css("backgroundColor","white");
 }
 
-$(function(){
-	//temporary position setup for divs
-	pageload();
-
-	$('.carddiv').draggable({
-		start: function(event, ui){dragStart(event, ui);},
-		stop: function(event, ui){dragStop(event, ui);},
-		});
-});
-
 function pageload(){
 	placeBaseElements();
 	setBoard();
@@ -100,11 +119,11 @@ function pageload(){
 }
 
 function placeBaseElements(){
-	//setup extra tray
+	//setup free cells
 	for(var i = 0; i<4; i++){
 		var left = (i*100)+"px";
 		var top = "0px"
-		$("#extra"+i).css({"left":left, "top":top});
+		$("#cell"+i).css({"left":left, "top":top});
 	}	
 	//setup win tray
 	for(var i = 0; i<4; i++){
@@ -151,10 +170,10 @@ function placeCards(){
 			var img;
 			if(j===(board[i].length-1)){
 				cardDiv.addClass("carddiv");
-				console.log(i+":"+j+":"+board[i].length);
-				img = $("<img>").attr("src", "images/"+idToCard(cardId)+".png");
+				img = fullCard("<img>", cardId);
+
 			}else{
-				img = $("<img>").attr("src", "images/"+idToCard(cardId)+"h.png");
+				img = halfCard("<img>", cardId);
 			}
 			cardDiv.append(img);
 			parent.append(cardDiv);
@@ -200,4 +219,16 @@ function getPips(id){
 			break;
 	}
 	return pips;
+}
+
+function fullCard(imgElement, cardId){
+	var element = $(imgElement);
+	element.attr("src", "images/"+idToCard(cardId)+".png");
+	return element;
+}
+
+function halfCard(imgElement, cardId){
+	var element = $(imgElement);
+	element.attr("src", "images/"+idToCard(cardId)+"h.png");
+	return element;
 }
