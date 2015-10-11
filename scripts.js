@@ -1,27 +1,15 @@
 /*
-♠ black spade suit name: &spades &#9824
-♡ red heart suit &#9825
-♢ red diamond suit &#9826
-♣ black club suit = shamrock name: &clubs &#9827
-♤ red spade suit &#9828
-♥ black heart suit = valentine name: &hearts &#9829
-♦ black diamond suit name: &diams &#9830
-♧ red club suit &#9831
+
 */
 
 var board = [[],[],[],[],[],[],[],[]];
 var freecells = [null,null,null,null];
-var wintray = [null,null,null,null];
+var wintray = [0,0,0,0];
 var validCardMoveTarget = false; //will either be false or the div the card has moved to.
 
 $(function(){
 	//temporary position setup for divs
 	pageload();
-
-	$('.carddiv').draggable({
-		start: function(event, ui){dragStart(event, ui);},
-		stop: function(event, ui){dragStop(event, ui);},
-		});
 });
 
 function dragStart(event, ui){
@@ -33,17 +21,87 @@ function dragStart(event, ui){
 	//console.log(movingObject.parent()[0]);
 	//TODO: make function exposeCard: add classes, show images, etc.
 	if(!movingObject.parent().hasClass("columntop")){
-
-		movingObject.parent().addClass("bottomdiv");
+		exposeCard(movingObject.parent());
 	}
 
+	findValidDrops(movingObject);
+}
+
+function findValidDrops(movingObject){
 	//when a card starts dragging, find all eligible drop locations and add droppable
-	$(".columntop").droppable({
+	var id = movingObject.attr("id");
+	var suit = Math.floor(id/13);
+	var pips = (id%13);
+	if($("#win"+suit).children().length===(pips)){
+		makeDroppable($("#win"+suit));
+	}
+	for(var i = 0; i<freecells.length; i++){
+		if($("#cell"+i).children().length===0){
+			makeDroppable($("#cell"+i));
+		}
+	}
+	for(var i = 0; i<8;i++){
+		//TODO: check if card can be stacked on the board;
+		var bottomCardId = idOfBottomCard("#col"+i);
+		if(cardCanBePlacedOn(id, bottomCardId)){
+			makeDroppable($("#"+bottomCardId));
+		}
+	}
+	console.log(id);
+}
+
+function cardCanBePlacedOn(movingId, placingId){
+	movingSuit = Math.floor(movingId/13);
+	placingSuit = Math.floor(placingId/13);
+	console.log(placingSuit)
+	console.log(movingSuit)
+	console.log("----")
+	if(movingSuit===0||movingSuit===2){
+		if(placingSuit===0||placingSuit===2){
+			return false;
+		}
+	}else{
+		if(placingSuit===1||placingSuit===3){
+			return false;
+		}
+	}
+	if((movingId%13+1)===(placingId%13)){
+		console.log("A")
+		return true;
+	}
+	return false;
+}
+
+function idOfBottomCard(div){
+	if($(div).children("div")[0]){
+		return idOfBottomCard($(div).children("div")[0]);
+	}
+	return $(div).attr("id");
+}
+
+function makeDroppable(div){
+	div.droppable({
 		activate: function(event, ui){droppableDragStarted(event,ui);},
 		deactivate: function(event, ui){droppableDragEnded(event,ui);},
 		drop: function(event, ui){droppableDragDropped(event,ui);},
 		tolerance: "pointer"
 		});
+	div.addClass("droppable");
+}
+
+function removeDroppable(){
+	$(".droppable").droppable("destroy").removeClass("droppable");
+}
+
+function makeDraggable(div){
+	div.draggable({
+		start: function(event, ui){dragStart(event, ui);},
+		stop: function(event, ui){dragStop(event, ui);},
+		});
+}
+
+function removeDraggable(div){
+	div.draggable("destroy").removeClass("carddiv");
 }
 
 function dragStop(event, ui){
@@ -52,37 +110,40 @@ function dragStop(event, ui){
 	//test if droppableDragDropped fired, meaning card has been moved
 	//otherwise return back to original location.
 	if(validCardMoveTarget){//change card's parent
-		$(validCardMoveTarget).append(card);
+		console.log(validCardMoveTarget.attr("id"));
+		validCardMoveTarget.append(card);
 		validCardMoveTarget=false;
 	}
 
 	if(!card.parent().hasClass("columntop")){//if the card has landed on another card, remove .topdiv
-												//if the card has landed on a blank column, keep .topdiv
-		card.removeClass("topdiv");
+		card.removeClass("topdiv");			 //if the card has landed on a blank column, keep .topdiv
 	}
 
 	if(card.parent().hasClass("bottomdiv")){
-		//TODO: find a better way to make an image half
-		//TODO: function hideCard(): remove classes, change image, etc.
-		var id = card.parent().attr("id");
-		var imgElement = card.parent().children("img").first();
-		halfCard(imgElement, id);
-
-		card.parent().removeClass("bottomdiv");
+		hideCard(card.parent());
 	}
 	
 	//move card back to original location
 	//or position it properly in new div.
 	card.css({left:0, top:0});
-	
+	removeDroppable();
 }
 
-function exposeCard(){
-	
+function exposeCard(div){
+	//TODO:add draggable if not already draggable (sequence card)
+	$(div).addClass("bottomdiv");
+	var id = div.attr("id");
+	var imgElement = div.children("img").first();
+	fullCard(imgElement, id);
 }
 
-function hideCard(){
+function hideCard(div){
+	//TODO:remove dragable if not a sequence card
 
+	$(div).removeClass("bottomdiv");
+	var id = div.attr("id");
+	var imgElement = div.children("img").first();
+	halfCard(imgElement, id);
 }
 
 function droppableDragStarted(event, ui){
@@ -99,7 +160,7 @@ function droppableDragEnded(event, ui){
 function droppableDragDropped(event, ui){
 	//set flag stating card has been dropped in a new, valid location
 	//dragStop will manage all card moves.
-	validCardMoveTarget = event.target;
+	validCardMoveTarget = $(event.target);
 	//the card has been dropped on an approved droppable
 	//console.log(validCardMoveTarget);
 }
@@ -116,6 +177,7 @@ function pageload(){
 	placeBaseElements();
 	setBoard();
 	placeCards();
+	makeDraggable($('.carddiv'));
 }
 
 function placeBaseElements(){
