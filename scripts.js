@@ -41,7 +41,12 @@ function findValidDrops(movingObject){
 		}
 	}
 	for(var i = 0; i<8;i++){
-		//TODO: check if card can be stacked on the board;
+		//if column empty
+		if(!$("#col"+i).children("div")[0]){
+			makeDroppable($("#col"+i));
+		}
+
+		//if card can be placed on bottom card
 		var bottomCardId = idOfBottomCard("#col"+i);
 		if(cardCanBePlacedOn(id, bottomCardId)){
 			makeDroppable($("#"+bottomCardId));
@@ -53,9 +58,6 @@ function findValidDrops(movingObject){
 function cardCanBePlacedOn(movingId, placingId){
 	movingSuit = Math.floor(movingId/13);
 	placingSuit = Math.floor(placingId/13);
-	console.log(placingSuit)
-	console.log(movingSuit)
-	console.log("----")
 	if(movingSuit===0||movingSuit===2){
 		if(placingSuit===0||placingSuit===2){
 			return false;
@@ -101,7 +103,9 @@ function makeDraggable(div){
 }
 
 function removeDraggable(div){
-	div.draggable("destroy").removeClass("carddiv");
+	if(div.data("draggable")){
+		div.draggable("destroy").removeClass("carddiv");
+	}
 }
 
 function dragStop(event, ui){
@@ -110,8 +114,8 @@ function dragStop(event, ui){
 	//test if droppableDragDropped fired, meaning card has been moved
 	//otherwise return back to original location.
 	if(validCardMoveTarget){//change card's parent
-		console.log(validCardMoveTarget.attr("id"));
 		validCardMoveTarget.append(card);
+		hideCard(validCardMoveTarget);
 		validCardMoveTarget=false;
 	}
 
@@ -132,6 +136,7 @@ function dragStop(event, ui){
 function exposeCard(div){
 	//TODO:add draggable if not already draggable (sequence card)
 	$(div).addClass("bottomdiv");
+	makeDraggable($(div));
 	var id = div.attr("id");
 	var imgElement = div.children("img").first();
 	fullCard(imgElement, id);
@@ -141,6 +146,7 @@ function hideCard(div){
 	//TODO:remove dragable if not a sequence card
 
 	$(div).removeClass("bottomdiv");
+	removeDraggable($(div));
 	var id = div.attr("id");
 	var imgElement = div.children("img").first();
 	halfCard(imgElement, id);
