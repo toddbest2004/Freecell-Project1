@@ -142,10 +142,21 @@ function doubleClick(div){
 		$("#win"+suit).append(div);
 		div.addClass("topdiv")
 		div.css({left:0, top:0});
+		div.off('dblclick');
 		return;
 	}
-	
-	
+	//test for free cells
+	for(var i = 0; i<4; i++){
+		if($("#cell"+i).children().length===0){
+			exposeCard(div.parent());
+			div.removeAttr("style");
+			$("#cell"+i).append(div);
+			div.addClass("topdiv")
+			div.css({left:0, top:0});
+			div.off('dblclick');
+			return;
+		}
+	}
 }
 
 function exposeCard(div){
@@ -154,7 +165,10 @@ function exposeCard(div){
 	var id = div.attr("id");
 	var imgElement = div.children("img").first();
 	fullCard(imgElement, id);
-	$(div).dblclick(function(e){doubleClick($(this));})
+	$(div).dblclick(function(e){
+		e.stopPropagation();
+		doubleClick($(this));
+	})
 }
 
 function hideCard(div){
