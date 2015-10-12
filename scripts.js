@@ -82,11 +82,12 @@ function dragStart(event, ui){
 	var stackSize = getStackSize(movingObject);
 	var cardId = movingObject.attr("id");
 	movingObject.addClass("topdiv");
+
+	findValidDrops(movingObject, stackSize);
 	//if card is stacked on another card, show the bottom card
 	if(!movingObject.parent().hasClass("columntop")){
 		exposeCard(movingObject.parent());
 	}
-	findValidDrops(movingObject, stackSize);
 }
 
 function dragStop(event, ui){
@@ -330,6 +331,7 @@ function moveCardTo(card, div){
 		removeDraggable(div.children().last());
 		div.children().last().removeClass("exposedcard");
 		updateAutoMoveIndex();
+		testForWin();
 	}
 	//TODO: test old parent for auto move to wintray
 	//has to be tested here, since expose card would test cards during card move, not after
@@ -407,6 +409,15 @@ function shuffleDeck(){
 	return deck;
 }
 
+function testForWin(){
+	for(var i=0; i<4; i++){
+		if($("#win"+i).children("div").length<13){
+			return false;
+		}
+	}
+	winner();
+}
+
 function removeDraggable(div){
 	div.draggable("destroy");
 }
@@ -424,4 +435,8 @@ function updateAutoMoveIndex(){
 		}
 	}
 	autoMove=index;
+}
+
+function winner(){
+	alert('Standard "You Win!" Dialogue.');
 }
