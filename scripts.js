@@ -1,4 +1,11 @@
 /*
+TODO:
+1) win state
+2) lose state
+KNOWN BUGS:
+1) Able to move larger stacks than normal into columns
+2) Some stacks won't be moveable until lower cards are moved
+3) No click, click support, only dragging
 FUTURE TODO LIST:
 1) use local storage to store and load games
 2) game statistics: win/loss ratio
