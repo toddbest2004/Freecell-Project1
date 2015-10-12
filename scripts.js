@@ -12,11 +12,21 @@ FUTURE TODO LIST:
 
 var board = [[],[],[],[],[],[],[],[]];
 var validCardMoveTarget = false; //will either be false or the div the card has moved to.
-
+var autoMove = 0;
 $(function(){
 	//temporary position setup for divs
 	pageload();
 });
+
+function autoMoveCard(id){
+	var pips = id%13;
+	var suit = Math.floor(id/13);
+	if($("#win"+suit).children().length===(pips)){
+		moveCardTo($("#"+id), $("#win"+suit));
+		$("#"+id).off('dblclick');
+		return;
+	}
+}
 
 function cardCanBePlacedOn(movingId, placingId){
 	movingSuit = Math.floor(movingId/13);
@@ -36,16 +46,27 @@ function cardCanBePlacedOn(movingId, placingId){
 	return false;
 }
 
+function doAutoMoves(){
+	//this function is not recursive since if a move is done, doAutoMoves is called from moveCardTo
+	var numcards = $(".exposedcard").length
+	for(var i = 0; i<numcards;i++){
+		var id = $($(".exposedcard")[i]).attr("id")
+		if(id%13<=autoMove+1){
+			autoMoveCard(id);
+		}
+	}
+}
+
 function doubleClick(div){
 	//if card goes in wintray, move there, otherwise move to first free cell, otherwise, do nothing
 	var id = div.attr("id");
 	var pips = id%13;
 	var suit = Math.floor(id/13);
-	if($("#win"+suit).children().length===(pips)){
-		moveCardTo(div, $("#win"+suit));
-		div.off('dblclick');
-		return;
-	}
+	// if($("#win"+suit).children().length===(pips)){
+	// 	moveCardTo(div, $("#win"+suit));
+	// 	div.off('dblclick');
+	// 	return;
+	// }
 	//test for free cells
 	for(var i = 0; i<4; i++){
 		if($("#cell"+i).children().length===0){
@@ -305,12 +326,15 @@ function moveCardTo(card, div){
 	card.addClass("topdiv")
 	card.css({left:0, top:0});
 
-	//if card has moved to wintray, make it unmoveable
+	//if card has moved to wintray, make it unmoveable, and update the index for automoving cards to wintray
 	if(div.attr("id").indexOf("win")!==-1){
 		removeDraggable(div.children().last());
+		div.children().last().removeClass("exposedcard");
+		updateAutoMoveIndex();
 	}
 	//TODO: test old parent for auto move to wintray
 	//has to be tested here, since expose card would test cards during card move, not after
+	doAutoMoves();
 }
 
 function pageload(){
@@ -390,4 +414,15 @@ function removeDraggable(div){
 
 function removeDroppables(){
 	$(".droppable").droppable("destroy").removeClass("droppable");
+}
+
+function updateAutoMoveIndex(){
+	//find the lowest card in the wintray, all cards <= card+1 should auto move
+	var index = 13;
+	for(var i=0; i<4; i++){
+		if($("#win"+i).children("div").length<index){
+			index = $("#win"+i).children("div").length;
+		}
+	}
+	autoMove=index;
 }
