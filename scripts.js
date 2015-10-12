@@ -1,7 +1,4 @@
 /*
-Known bugs;
-win tray doesn't highlight properly after a card is on pile.
-
 FUTURE TODO LIST:
 1) use local storage to store and load games
 2) game statistics: win/loss ratio
@@ -62,11 +59,6 @@ function doubleClick(div){
 	var id = div.attr("id");
 	var pips = id%13;
 	var suit = Math.floor(id/13);
-	// if($("#win"+suit).children().length===(pips)){
-	// 	moveCardTo(div, $("#win"+suit));
-	// 	div.off('dblclick');
-	// 	return;
-	// }
 	//test for free cells
 	for(var i = 0; i<4; i++){
 		if($("#cell"+i).children().length===0){
@@ -334,7 +326,7 @@ function moveCardTo(card, div){
 	}
 	//TODO: test old parent for auto move to wintray
 	//has to be tested here, since expose card would test cards during card move, not after
-	doAutoMoves();
+	setTimeout(doAutoMoves, 100);
 }
 
 function pageload(){
