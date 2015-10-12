@@ -3,8 +3,6 @@
 */
 
 var board = [[],[],[],[],[],[],[],[]];
-var freecells = [null,null,null,null];
-var wintray = [0,0,0,0];
 var validCardMoveTarget = false; //will either be false or the div the card has moved to.
 
 $(function(){
@@ -35,7 +33,7 @@ function findValidDrops(movingObject){
 	if($("#win"+suit).children().length===(pips)){
 		makeDroppable($("#win"+suit));
 	}
-	for(var i = 0; i<freecells.length; i++){
+	for(var i = 0; i<4; i++){
 		if($("#cell"+i).children().length===0){
 			makeDroppable($("#cell"+i));
 		}
@@ -133,13 +131,30 @@ function dragStop(event, ui){
 	removeDroppable();
 }
 
+function doubleClick(div){
+	//if card goes in wintray, move there, otherwise move to first free cell, otherwise, do nothing
+	var id = div.attr("id");
+	var pips = id%13;
+	var suit = Math.floor(id/13);
+	if($("#win"+suit).children().length===(pips)){
+		exposeCard(div.parent());
+		div.removeAttr("style");
+		$("#win"+suit).append(div);
+		div.addClass("topdiv")
+		div.css({left:0, top:0});
+		return;
+	}
+	
+	
+}
+
 function exposeCard(div){
-	//TODO:add draggable if not already draggable (sequence card)
 	$(div).addClass("bottomdiv");
 	makeDraggable($(div));
 	var id = div.attr("id");
 	var imgElement = div.children("img").first();
 	fullCard(imgElement, id);
+	$(div).dblclick(function(e){doubleClick($(this));})
 }
 
 function hideCard(div){
@@ -150,6 +165,7 @@ function hideCard(div){
 	var id = div.attr("id");
 	var imgElement = div.children("img").first();
 	halfCard(imgElement, id);
+	$(div).off("dblclick");
 }
 
 function droppableDragStarted(event, ui){
@@ -183,7 +199,7 @@ function pageload(){
 	placeBaseElements();
 	setBoard();
 	placeCards();
-	makeDraggable($('.carddiv'));
+	exposeCard($('.carddiv'));
 }
 
 function placeBaseElements(){
