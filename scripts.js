@@ -1,4 +1,7 @@
 /*
+Known bugs;
+win tray doesn't highlight properly after a card is on pile.
+
 FUTURE TODO LIST:
 1) use local storage to store and load games
 2) game statistics: win/loss ratio
@@ -53,16 +56,17 @@ function doubleClick(div){
 }
 
 function dragStart(event, ui){
-	//console.log(event);
+	//TODO: determine number of cards moving, if > 1, can't move to wintray or free cell
+	//if > 1, make sure there are enough open spaces to move full stack.
 	var movingObject = $(event.target);
+	var stackSize = getStackSize(movingObject);
 	var cardId = movingObject.attr("id");
 	movingObject.addClass("topdiv");
 	//if card is stacked on another card, show the bottom card
-	//console.log(movingObject.parent()[0]);
 	if(!movingObject.parent().hasClass("columntop")){
 		exposeCard(movingObject.parent());
 	}
-	findValidDrops(movingObject);
+	findValidDrops(movingObject, stackSize);
 }
 
 function dragStop(event, ui){
@@ -94,7 +98,6 @@ function droppableDragDropped(event, ui){
 	//dragStop will manage all card moves.
 	validCardMoveTarget = $(event.target);
 	//the card has been dropped on an approved droppable
-	//console.log(validCardMoveTarget);
 }
 
 function droppableDragEnded(event, ui){
@@ -122,22 +125,30 @@ function exposeCard(div){
 	}
 }
 
-function findValidDrops(movingObject){
+function findValidDrops(movingObject, stackSize){
 	//when a card starts dragging, find all eligible drop locations and add droppable
 	var id = movingObject.attr("id");
 	var suit = Math.floor(id/13);
 	var pips = (id%13);
-	if($("#win"+suit).children().length===(pips)){
-		makeDroppable($("#win"+suit));
+	if(stackSize>getMaxStackSize()){
+		//TODO: Make a message function that displays error messages.
+		console.log("stack too large");
+		return;
 	}
-	for(var i = 0; i<4; i++){
-		if($("#cell"+i).children().length===0){
-			makeDroppable($("#cell"+i));
+
+	if(stackSize===1){
+		if($("#win"+suit).children().length===(pips)){
+			makeDroppable($("#win"+suit));
+		}
+		for(var i = 0; i<4; i++){
+			if($("#cell"+i).children().length===0){
+				makeDroppable($("#cell"+i));
+			}
 		}
 	}
 	for(var i = 0; i<8;i++){
 		//if column empty
-		if(!$("#col"+i).children("div")[0]){
+		if($("#col"+i).children("div").length===0){
 			makeDroppable($("#col"+i));
 		}
 
@@ -155,6 +166,22 @@ function fullCard(imgElement, cardId){
 	return element;
 }
 
+function getMaxStackSize(){
+	var stackSize = 1;
+	var multiplier = 1;
+	for(var i = 0; i<4; i++){
+		if($("#cell"+i).children().length===0){
+			stackSize++;
+		}
+	}
+	for(var i = 0; i<8; i++){
+		if($("#col"+i).children("div").length===0){
+			multiplier++;
+		}
+	}
+	return stackSize*multiplier;
+}
+
 function getPips(id){
 	var pips = id%13+1;
 	switch(pips){
@@ -169,6 +196,13 @@ function getPips(id){
 			break;
 	}
 	return pips;
+}
+
+function getStackSize(div){
+	if(div.children("div").length===0){
+		return 1;
+	}
+	return 1+getStackSize(div.children("div").first());
 }
 
 function getSuit(id){
@@ -198,8 +232,6 @@ function halfCard(imgElement, cardId){
 
 function hideCard(div){
 	//remove dragable if not a sequence card
-	//console.log(isInSequence(div));
-	//console.log(div.attr('id'))
 	if(!isInSequence(div)){
 		removeDraggable($(div));
 	}
@@ -265,6 +297,7 @@ function makeDroppable(div){
 }
 
 function moveCardTo(card, div){
+	//TODO: record move (card, div, stacksize) into a history table, for undo/redo
 	var oldParent = card.parent();
 	exposeCard(oldParent);
 	card.removeAttr("style");
@@ -272,8 +305,10 @@ function moveCardTo(card, div){
 	card.addClass("topdiv")
 	card.css({left:0, top:0});
 
-	//TODO: if card has moved to wintray, make it unmoveable
-
+	//if card has moved to wintray, make it unmoveable
+	if(div.attr("id").indexOf("win")!==-1){
+		removeDraggable(div.children().last());
+	}
 	//TODO: test old parent for auto move to wintray
 	//has to be tested here, since expose card would test cards during card move, not after
 }
