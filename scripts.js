@@ -38,9 +38,6 @@ function doubleClick(div){
 	var id = div.attr("id");
 	var pips = id%13;
 	var suit = Math.floor(id/13);
-	console.log($("#win"+suit).children().length);
-	console.log(pips);
-	console.log("----")
 	if($("#win"+suit).children().length===(pips)){
 		moveCardTo(div, $("#win"+suit));
 		div.off('dblclick');
@@ -200,10 +197,14 @@ function halfCard(imgElement, cardId){
 }
 
 function hideCard(div){
-	//TODO:remove dragable if not a sequence card
+	//remove dragable if not a sequence card
+	//console.log(isInSequence(div));
+	//console.log(div.attr('id'))
+	if(!isInSequence(div)){
+		removeDraggable($(div));
+	}
 
 	$(div).removeClass("exposedcard");
-	removeDraggable($(div));
 	var id = div.attr("id");
 	var imgElement = div.children("img").first();
 	halfCard(imgElement, id);
@@ -233,6 +234,19 @@ function idToCard(id){
 	return getSuit(id)+getPips(id);
 }
 
+function isInSequence(div){
+	if($(div).children("div").length===0){
+		return true;
+	}
+	var id = $(div).attr("id")
+	var child = $(div).children("div").first()
+	var childId = child.attr("id");
+	if(cardCanBePlacedOn(childId, id)){
+		return isInSequence(child);
+	}
+	return false;
+}
+
 function makeDraggable(div){
 	div.draggable({
 		start: function(event, ui){dragStart(event, ui);},
@@ -257,6 +271,8 @@ function moveCardTo(card, div){
 	$(div).append(card);
 	card.addClass("topdiv")
 	card.css({left:0, top:0});
+
+	//TODO: if card has moved to wintray, make it unmoveable
 
 	//TODO: test old parent for auto move to wintray
 	//has to be tested here, since expose card would test cards during card move, not after
@@ -334,9 +350,7 @@ function shuffleDeck(){
 }
 
 function removeDraggable(div){
-	if(div.data("draggable")){
-		div.draggable("destroy").removeClass("carddiv");
-	}
+	div.draggable("destroy");
 }
 
 function removeDroppables(){
