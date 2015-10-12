@@ -1,5 +1,10 @@
 /*
-
+FUTURE TODO LIST:
+1) use local storage to store and load games
+2) game statistics: win/loss ratio
+3) game history: undo/redo moves
+4) move hints: show available moves
+5) if I get really bored, create AI to play game
 */
 
 var board = [[],[],[],[],[],[],[],[]];
@@ -33,6 +38,9 @@ function doubleClick(div){
 	var id = div.attr("id");
 	var pips = id%13;
 	var suit = Math.floor(id/13);
+	console.log($("#win"+suit).children().length);
+	console.log(pips);
+	console.log("----")
 	if($("#win"+suit).children().length===(pips)){
 		moveCardTo(div, $("#win"+suit));
 		div.off('dblclick');
@@ -54,7 +62,6 @@ function dragStart(event, ui){
 	movingObject.addClass("topdiv");
 	//if card is stacked on another card, show the bottom card
 	//console.log(movingObject.parent()[0]);
-	//TODO: make function exposeCard: add classes, show images, etc.
 	if(!movingObject.parent().hasClass("columntop")){
 		exposeCard(movingObject.parent());
 	}
@@ -75,7 +82,7 @@ function dragStop(event, ui){
 		card.removeClass("topdiv");			 //if the card has landed on a blank column, keep .topdiv
 	}
 
-	if(card.parent().hasClass("bottomdiv")){
+	if(card.parent().hasClass("exposedcard")){
 		hideCard(card.parent());
 	}
 	
@@ -105,17 +112,17 @@ function droppableDragStarted(event, ui){
 }
 
 function exposeCard(div){
-	//TODO: if exposed card fits on win tray, move it there automatically
-
-	$(div).addClass("bottomdiv");
-	makeDraggable($(div));
-	var id = div.attr("id");
-	var imgElement = div.children("img").first();
-	fullCard(imgElement, id);
-	$(div).dblclick(function(e){
-		e.stopPropagation();
-		doubleClick($(this));
-	})
+	if(!$(div).hasClass("exposedcard")){
+		$(div).addClass("exposedcard");
+		makeDraggable($(div));
+		var id = div.attr("id");
+		var imgElement = div.children("img").first();
+		fullCard(imgElement, id);
+		$(div).dblclick(function(e){
+			e.stopPropagation();
+			doubleClick($(this));
+		});
+	}
 }
 
 function findValidDrops(movingObject){
@@ -195,7 +202,7 @@ function halfCard(imgElement, cardId){
 function hideCard(div){
 	//TODO:remove dragable if not a sequence card
 
-	$(div).removeClass("bottomdiv");
+	$(div).removeClass("exposedcard");
 	removeDraggable($(div));
 	var id = div.attr("id");
 	var imgElement = div.children("img").first();
@@ -244,11 +251,15 @@ function makeDroppable(div){
 }
 
 function moveCardTo(card, div){
-	exposeCard(card.parent());
+	var oldParent = card.parent();
+	exposeCard(oldParent);
 	card.removeAttr("style");
 	$(div).append(card);
 	card.addClass("topdiv")
 	card.css({left:0, top:0});
+
+	//TODO: test old parent for auto move to wintray
+	//has to be tested here, since expose card would test cards during card move, not after
 }
 
 function pageload(){
