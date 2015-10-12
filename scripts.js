@@ -34,22 +34,14 @@ function doubleClick(div){
 	var pips = id%13;
 	var suit = Math.floor(id/13);
 	if($("#win"+suit).children().length===(pips)){
-		exposeCard(div.parent());
-		div.removeAttr("style");
-		$("#win"+suit).append(div);
-		div.addClass("topdiv")
-		div.css({left:0, top:0});
+		moveCardTo(div, $("#win"+suit));
 		div.off('dblclick');
 		return;
 	}
 	//test for free cells
 	for(var i = 0; i<4; i++){
 		if($("#cell"+i).children().length===0){
-			exposeCard(div.parent());
-			div.removeAttr("style");
-			$("#cell"+i).append(div);
-			div.addClass("topdiv")
-			div.css({left:0, top:0});
+			moveCardTo(div, $("#cell"+i));
 			return;
 		}
 	}
@@ -114,6 +106,8 @@ function droppableDragStarted(event, ui){
 }
 
 function exposeCard(div){
+	//TODO: if exposed card fits on win tray, move it there automatically
+
 	$(div).addClass("bottomdiv");
 	makeDraggable($(div));
 	var id = div.attr("id");
@@ -246,6 +240,13 @@ function makeDroppable(div){
 	div.addClass("droppable");
 }
 
+function moveCardTo(card, div){
+		exposeCard(card.parent());
+		card.removeAttr("style");
+		$(div).append(card);
+		card.addClass("topdiv")
+		card.css({left:0, top:0});
+}
 
 function pageload(){
 	placeBaseElements();
