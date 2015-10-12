@@ -67,8 +67,7 @@ function dragStop(event, ui){
 	//test if droppableDragDropped fired, meaning card has been moved
 	//otherwise return back to original location.
 	if(validCardMoveTarget){//change card's parent
-		validCardMoveTarget.append(card);
-		hideCard(validCardMoveTarget);
+		moveCardTo(card, validCardMoveTarget)
 		validCardMoveTarget=false;
 	}
 
@@ -82,8 +81,8 @@ function dragStop(event, ui){
 	
 	//move card back to original location
 	//or position it properly in new div.
-	card.css({left:0, top:0});
-	removeDroppable();
+	//card.css({left:0, top:0});
+	removeDroppables();
 }
 
 function droppableDragDropped(event, ui){
@@ -205,11 +204,15 @@ function hideCard(div){
 }
 
 function highlightOff(div){
-	$(div).css("backgroundColor","white");
+	$(".highlighted").unwrap().removeClass("highlighted");
 }
 
 function highlightOn(div){
-	$(div).css("backgroundColor","blue");
+	if($(div).children("img").length>0){
+		$(div).children("img").first().addClass("highlighted").wrap("<div class='tint'></div>");
+		return;
+	}
+	$(div).addClass("highlighted");
 }
 
 function idOfBottomCard(div){
@@ -241,11 +244,11 @@ function makeDroppable(div){
 }
 
 function moveCardTo(card, div){
-		exposeCard(card.parent());
-		card.removeAttr("style");
-		$(div).append(card);
-		card.addClass("topdiv")
-		card.css({left:0, top:0});
+	exposeCard(card.parent());
+	card.removeAttr("style");
+	$(div).append(card);
+	card.addClass("topdiv")
+	card.css({left:0, top:0});
 }
 
 function pageload(){
@@ -325,6 +328,6 @@ function removeDraggable(div){
 	}
 }
 
-function removeDroppable(){
+function removeDroppables(){
 	$(".droppable").droppable("destroy").removeClass("droppable");
 }
