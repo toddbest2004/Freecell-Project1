@@ -14,6 +14,12 @@ FUTURE TODO LIST:
 5) if I get really bored, create AI to play game
 */
 
+const NUM_SUITS = 4;
+const CARDS_PER_SUIT=13;
+const WIN_TRAYS = 4;
+const FREE_CELLS = 4;
+const COLUMNS = 8;
+
 var board = [[],[],[],[],[],[],[],[]];
 var validCardMoveTarget = false; //will either be false or the div the card has moved to.
 var autoMove = 0;
@@ -23,8 +29,8 @@ $(function(){
 });
 
 function autoMoveCard(id){
-	var pips = id%13;
-	var suit = Math.floor(id/13);
+	var pips = id%CARDS_PER_SUIT;
+	var suit = Math.floor(id/CARDS_PER_SUIT);
 	if($("#win"+suit).children().length===(pips)){
 		moveCardTo($("#"+id), $("#win"+suit));
 		$("#"+id).off('dblclick');
@@ -33,8 +39,8 @@ function autoMoveCard(id){
 }
 
 function cardCanBePlacedOn(movingId, placingId){
-	movingSuit = Math.floor(movingId/13);
-	placingSuit = Math.floor(placingId/13);
+	movingSuit = Math.floor(movingId/CARDS_PER_SUIT);
+	placingSuit = Math.floor(placingId/CARDS_PER_SUIT);
 	if(movingSuit===0||movingSuit===2){
 		if(placingSuit===0||placingSuit===2){
 			return false;
@@ -44,7 +50,7 @@ function cardCanBePlacedOn(movingId, placingId){
 			return false;
 		}
 	}
-	if((movingId%13+1)===(placingId%13)){
+	if((movingId%CARDS_PER_SUIT+1)===(placingId%CARDS_PER_SUIT)){
 		return true;
 	}
 	return false;
@@ -55,7 +61,7 @@ function doAutoMoves(){
 	var numcards = $(".exposedcard").length
 	for(var i = 0; i<numcards;i++){
 		var id = $($(".exposedcard")[i]).attr("id")
-		if(id%13<=autoMove+1){
+		if(id%CARDS_PER_SUIT<=autoMove+1){
 			autoMoveCard(id);
 		}
 	}
@@ -64,10 +70,10 @@ function doAutoMoves(){
 function doubleClick(div){
 	//if card goes in wintray, move there, otherwise move to first free cell, otherwise, do nothing
 	var id = div.attr("id");
-	var pips = id%13;
-	var suit = Math.floor(id/13);
+	var pips = id%CARDS_PER_SUIT;
+	var suit = Math.floor(id/CARDS_PER_SUIT);
 	//test for free cells
-	for(var i = 0; i<4; i++){
+	for(var i = 0; i<FREE_CELLS; i++){
 		if($("#cell"+i).children().length===0){
 			moveCardTo(div, $("#cell"+i));
 			return;
@@ -149,8 +155,8 @@ function exposeCard(div){
 function findValidDrops(movingObject, stackSize){
 	//when a card starts dragging, find all eligible drop locations and add droppable
 	var id = movingObject.attr("id");
-	var suit = Math.floor(id/13);
-	var pips = (id%13);
+	var suit = Math.floor(id/CARDS_PER_SUIT);
+	var pips = (id%CARDS_PER_SUIT);
 	if(stackSize>getMaxStackSize()){
 		//TODO: Make a message function that displays error messages.
 		console.log("stack too large");
@@ -161,13 +167,13 @@ function findValidDrops(movingObject, stackSize){
 		if($("#win"+suit).children().length===(pips)){
 			makeDroppable($("#win"+suit));
 		}
-		for(var i = 0; i<4; i++){
+		for(var i = 0; i<FREE_CELLS; i++){
 			if($("#cell"+i).children().length===0){
 				makeDroppable($("#cell"+i));
 			}
 		}
 	}
-	for(var i = 0; i<8;i++){
+	for(var i = 0; i<COLUMNS;i++){
 		//if column empty
 		if($("#col"+i).children("div").length===0){
 			makeDroppable($("#col"+i));
@@ -190,12 +196,12 @@ function fullCard(imgElement, cardId){
 function getMaxStackSize(){
 	var stackSize = 1;
 	var multiplier = 1;
-	for(var i = 0; i<4; i++){
+	for(var i = 0; i<FREE_CELLS; i++){
 		if($("#cell"+i).children().length===0){
 			stackSize++;
 		}
 	}
-	for(var i = 0; i<8; i++){
+	for(var i = 0; i<COLUMNS; i++){
 		if($("#col"+i).children("div").length===0){
 			multiplier++;
 		}
@@ -204,7 +210,7 @@ function getMaxStackSize(){
 }
 
 function getPips(id){
-	var pips = id%13+1;
+	var pips = id%CARDS_PER_SUIT+1;
 	switch(pips){
 		case 11:
 			pips = "j"
@@ -227,7 +233,7 @@ function getStackSize(div){
 }
 
 function getSuit(id){
-	var suit = Math.floor(id/13);
+	var suit = Math.floor(id/CARDS_PER_SUIT);
 	switch(suit){
 		case 0:
 			suit = "c"
@@ -347,20 +353,20 @@ function pageload(){
 
 function placeBaseElements(){
 	//setup free cells
-	for(var i = 0; i<4; i++){
+	for(var i = 0; i<FREE_CELLS; i++){
 		var left = (i*100)+"px";
 		var top = "0px"
 		$("#cell"+i).css({"left":left, "top":top});
 	}	
 	//setup win tray
-	for(var i = 0; i<4; i++){
+	for(var i = 0; i<WIN_TRAYS; i++){
 		var left = 400+(i*100)+"px";
 		var top = "0px"
 		$("#win"+i).css({"left":left, "top":top});
 	}	
 
 	//setup main columns
-	for(var i = 0; i<8; i++){
+	for(var i = 0; i<COLUMNS; i++){
 		var left = (i*100)+"px";
 		var top = "150px"
 		$("#col"+i).css({"left":left, "top":top});
@@ -369,7 +375,7 @@ function placeBaseElements(){
 
 function placeCards(){
 	var parent;
-	for(var i=0; i<8;i++){
+	for(var i=0; i<COLUMNS;i++){
 		parent=$("#col"+i);
 		for(var j=0; j<board[i].length;j++){
 			var cardId = board[i][j];
@@ -392,7 +398,7 @@ function placeCards(){
 function setBoard(){
 	var deck = shuffleDeck();
 	for(var i=0; i<52;i++){
-		board[i%8].push(deck[i]);
+		board[i%COLUMNS].push(deck[i]);
 	}
 }
 
@@ -410,8 +416,8 @@ function shuffleDeck(){
 }
 
 function testForWin(){
-	for(var i=0; i<4; i++){
-		if($("#win"+i).children("div").length<13){
+	for(var i=0; i<WIN_TRAYS; i++){
+		if($("#win"+i).children("div").length<CARDS_PER_SUIT){
 			return false;
 		}
 	}
@@ -428,8 +434,8 @@ function removeDroppables(){
 
 function updateAutoMoveIndex(){
 	//find the lowest card in the wintray, all cards <= card+1 should auto move
-	var index = 13;
-	for(var i=0; i<4; i++){
+	var index = CARDS_PER_SUIT;
+	for(var i=0; i<WIN_TRAYS; i++){
 		if($("#win"+i).children("div").length<index){
 			index = $("#win"+i).children("div").length;
 		}
