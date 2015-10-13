@@ -306,6 +306,10 @@ function isInSequence(div){
 	return false;
 }
 
+function loser(){//a very sad function, with a sad name
+	alert("looks like a loss!");
+}
+
 function makeDraggable(div){
 	div.draggable({
 		start: function(event, ui){dragStart(event, ui);},
@@ -337,11 +341,57 @@ function moveCardTo(card, div){
 		removeDraggable(div.children().last());
 		div.children().last().removeClass("exposedcard");
 		updateAutoMoveIndex();
-		testForWin();
+		if(testForWin()){
+			winner();
+		}
 	}
+	if(!testForWin()){
+		if(testForLose()){
+			loser();
+		}
+	}
+
 	//TODO: test old parent for auto move to wintray
 	//has to be tested here, since expose card would test cards during card move, not after
 	setTimeout(doAutoMoves, 100);
+}
+
+function movesAvailable(){//test if moves are available
+	for(var i=0; i<FREE_CELLS; i++){
+		if($("#cell"+i).children("div").length===0){
+			return true;
+		}
+		var id = $("#cell"+i).children("div").first().attr("id");
+		var pips = id%CARDS_PER_SUIT;
+		var suit = Math.floor(id/CARDS_PER_SUIT);
+		if($("#win"+suit).children().length===(pips)){
+			return true;
+		}
+	}
+	for(var i=0; i<COLUMNS; i++){
+		if($("#col"+i).children("div").length===0){
+			return true;
+		}
+		for(var j=0; j<COLUMNS; j++){
+			if(cardCanBePlacedOn(idOfBottomCard("#cell"+i), idOfBottomCard("#col"+j))){
+				return true;
+			}
+		}
+	}
+	for(var i=0; i<COLUMNS; i++){
+		for(var j=0; j<COLUMNS; j++){
+			var id = idOfBottomCard("#col"+i);
+			if(cardCanBePlacedOn(id, idOfBottomCard("#col"+j))){
+				return true;
+			}
+			var pips = id%CARDS_PER_SUIT;
+			var suit = Math.floor(id/CARDS_PER_SUIT);
+			if($("#win"+suit).children().length===(pips)){
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 function pageload(){
@@ -421,7 +471,14 @@ function testForWin(){
 			return false;
 		}
 	}
-	winner();
+	return true;
+}
+
+function testForLose(){
+	if(!movesAvailable()){
+		loser();
+	}
+	return false;
 }
 
 function removeDraggable(div){
