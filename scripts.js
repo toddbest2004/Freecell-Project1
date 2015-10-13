@@ -27,20 +27,31 @@ var wins=0;
 var losses=0;
 var games=0;
 var percentage=0;
+var win=false;
+
+//var history = [];
 
 $(function(){
 	//temporary position setup for divs
 	loadGame();
 
 	$("#reset").click(function(){
-		games++;
-		losses++;
+		if(win){
+			win=false;
+		}else{
+			games++;
+			losses++;
+		}
 		resetGame();
 		updateSideBar();
 	});
 	$("#newgame").click(function(){
-		games++;
-		losses++;
+		if(win){
+			win=false;
+		}else{
+			games++;
+			losses++;
+		}
 		newGame();
 		updateSideBar();
 	});
@@ -185,12 +196,6 @@ function findValidDrops(movingObject, stackSize){
 	var id = movingObject.attr("id");
 	var suit = Math.floor(id/CARDS_PER_SUIT);
 	var pips = (id%CARDS_PER_SUIT);
-	if(stackSize>getMaxStackSize()){
-		//TODO: Make a message function that displays error messages.
-		console.log("stack too large");
-		return;
-	}
-
 	if(stackSize===1){
 		if($("#win"+suit).children().length===(pips)){
 			makeDroppable($("#win"+suit));
@@ -204,13 +209,17 @@ function findValidDrops(movingObject, stackSize){
 	for(var i = 0; i<COLUMNS;i++){
 		//if column empty
 		if($("#col"+i).children("div").length===0){
-			makeDroppable($("#col"+i));
+			if(!(stackSize>(getMaxStackSize()/2))){
+				makeDroppable($("#col"+i));
+			}
 		}
 
 		//if card can be placed on bottom card
 		var bottomCardId = idOfBottomCard("#col"+i);
 		if(cardCanBePlacedOn(id, bottomCardId)){
-			makeDroppable($("#"+bottomCardId));
+			if(!(stackSize>getMaxStackSize())){
+				makeDroppable($("#"+bottomCardId));
+			}
 		}
 	}
 }
@@ -222,19 +231,29 @@ function fullCard(imgElement, cardId){
 }
 
 function getMaxStackSize(){
-	var stackSize = 1;
-	var multiplier = 1;
+	var stackSize = 1+getNumFreeCells();
+	var multiplier = getNumFreeColumns();
+	return stackSize*Math.pow(2,multiplier);
+}
+
+function getNumFreeCells(){
+	var freecells=0;
 	for(var i = 0; i<FREE_CELLS; i++){
 		if($("#cell"+i).children().length===0){
-			stackSize++;
+			freecells++;
 		}
 	}
+	return freecells;
+}
+
+function getNumFreeColumns(){
+	var columns=0;
 	for(var i = 0; i<COLUMNS; i++){
 		if($("#col"+i).children("div").length===0){
-			multiplier++;
+			columns++;
 		}
 	}
-	return stackSize*multiplier;
+	return columns;
 }
 
 function getPips(id){
@@ -342,6 +361,7 @@ function loadGame(){
 		games=game.games;
 		wins=game.wins;
 		losses=game.losses;
+		win=game.win;
 		updateSideBar();
 		placeBaseElements();
 		placeLoadCards();
@@ -353,8 +373,6 @@ function loadGame(){
 }
 
 function loser(){//a very sad function, with a sad name
-	games++;
-	losses++;
 	updateSideBar();
 	alert("looks like a loss!");
 }
@@ -582,7 +600,7 @@ function saveGame(){
 	for(var i=0; i<WIN_TRAYS; i++){
 		currentboard[i+12] = $("#win"+i).children("div").length;
 	}
-	game = {board:board, currentboard: currentboard, wins: wins, games: games, losses:losses};
+	game = {board:board, currentboard: currentboard, wins: wins, games: games, losses:losses, win:win};
 	localStorage.setItem("freecell", JSON.stringify(game));
 }
 
@@ -637,11 +655,13 @@ function updateSideBar(){
 	$("#games").html(games);
 	$("#wins").html(wins);
 	$("#losses").html(losses);
-	percentage=Math.floor(wins/games);
+	percentage=Math.floor(wins/games*100);
 	$("#percent").html(percentage);
+	$("#sidebar").show();
 }
 
 function winner(){
+	win=true;
 	games++;
 	wins++;
 	updateSideBar();
