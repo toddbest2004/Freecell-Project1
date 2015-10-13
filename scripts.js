@@ -25,7 +25,10 @@ var validCardMoveTarget = false; //will either be false or the div the card has 
 var autoMove = 0;
 $(function(){
 	//temporary position setup for divs
-	pageload();
+	newGame();
+
+	$("#reset").click(resetGame);
+	$("#newgame").click(newGame);
 });
 
 function autoMoveCard(id){
@@ -357,15 +360,17 @@ function moveCardTo(card, div){
 }
 
 function movesAvailable(){//test if moves are available
+	var movelist = {};//not yet implemented
 	for(var i=0; i<FREE_CELLS; i++){
 		if($("#cell"+i).children("div").length===0){
 			return true;
-		}
-		var id = $("#cell"+i).children("div").first().attr("id");
-		var pips = id%CARDS_PER_SUIT;
-		var suit = Math.floor(id/CARDS_PER_SUIT);
-		if($("#win"+suit).children().length===(pips)){
-			return true;
+		}else{
+			var id = $("#cell"+i).children("div").first().attr("id");
+			var pips = id%CARDS_PER_SUIT;
+			var suit = Math.floor(id/CARDS_PER_SUIT);
+			if($("#win"+suit).children().length===(pips)){
+				return true;
+			}
 		}
 	}
 	for(var i=0; i<COLUMNS; i++){
@@ -394,23 +399,16 @@ function movesAvailable(){//test if moves are available
 	return false;
 }
 
-function pageload(){
-	placeBaseElements();
-	setBoard();
-	placeCards();
-	exposeCard($('.carddiv'));
-}
-
 function placeBaseElements(){
 	//setup free cells
 	for(var i = 0; i<FREE_CELLS; i++){
-		var left = (i*100)+"px";
+		var left = (i*80)+"px";
 		var top = "0px"
 		$("#cell"+i).css({"left":left, "top":top});
 	}	
 	//setup win tray
 	for(var i = 0; i<WIN_TRAYS; i++){
-		var left = 400+(i*100)+"px";
+		var left = 460+(i*80)+"px";
 		var top = "0px"
 		$("#win"+i).css({"left":left, "top":top});
 	}	
@@ -443,6 +441,22 @@ function placeCards(){
 			parent = parent.children("div").first();
 		}
 	}
+}
+
+function resetGame(){
+	$(".columntop").empty();
+	placeBaseElements();
+	placeCards();
+	exposeCard($('.carddiv'));
+}
+
+function newGame(){
+	$(".columntop").empty();
+	board = [[],[],[],[],[],[],[],[]];
+	placeBaseElements();
+	setBoard();
+	placeCards();
+	exposeCard($('.carddiv'));
 }
 
 function setBoard(){

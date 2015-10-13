@@ -1,3 +1,11 @@
+div{
+	position:relative;
+}
+
+body{
+	background-color:green;
+}
+
 .card, img{
 	margin: 0;
 	padding: 0;
@@ -11,6 +19,7 @@
 	height: 96px;
 	width: 71px;
 	position: absolute;
+	border: 1px solid black;
 }
 
 .exposedcard{
@@ -36,15 +45,16 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background: rgba(255,0,0, 0.5);
+	background: rgba(255,255,255, 0.5);
 	transition: all .3s linear;
 }
 
 .highlighted{
 	box-shadow: rgba(0,0,0,.2) 3px 5px 5px;
-	background: rgba(255,0,0, 0.5);
+	background: rgba(255,255,255, 0.5);
 }
 
-div{
-	position:relative;
+#instructions{
+	border: 1px solid black;
+	float: right;
 }
