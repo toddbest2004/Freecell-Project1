@@ -54,7 +54,33 @@ body{
 	background: rgba(255,255,255, 0.5);
 }
 
-#instructions{
+#sidebar{
+	width: 500px;
+	position:absolute;
+	padding: 10px;
+	background-color: white;
 	border: 1px solid black;
 	float: right;
+	top:0;
+	bottom:0;
+	right: 0;
+}
+
+#buttondiv{
+	width: 500px;
+	text-align: center;
+}
+
+#bottombuttondiv{
+	position: absolute;
+	bottom:0;
+	width: 500px;
+	text-align: center;
+}
+
+#menutogglediv{
+	position: absolute;
+	left: 320px;
+	width: 130px;
+	text-align: center;
 }

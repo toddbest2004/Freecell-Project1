@@ -23,12 +23,29 @@ const COLUMNS = 8;
 var board = [[],[],[],[],[],[],[],[]];
 var validCardMoveTarget = false; //will either be false or the div the card has moved to.
 var autoMove = 0;
+var wins=0;
+var losses=0;
+var games=0;
+var percentage=0;
+
 $(function(){
 	//temporary position setup for divs
 	newGame();
 
-	$("#reset").click(resetGame);
-	$("#newgame").click(newGame);
+	$("#reset").click(function(){
+		resetGame();
+		games++;
+		losses++;
+		updateSideBar();
+	});
+	$("#newgame").click(function(){
+		newGame();
+		games++;
+		losses++;
+		updateSideBar();
+	});
+	$(".togglemenu").click(function(){$("#sidebar").toggle();});
+	$("#statistics").click(resetStatistics);
 });
 
 function autoMoveCard(id){
@@ -310,6 +327,9 @@ function isInSequence(div){
 }
 
 function loser(){//a very sad function, with a sad name
+	games++;
+	losses++;
+	updateSideBar();
 	alert("looks like a loss!");
 }
 
@@ -399,6 +419,15 @@ function movesAvailable(){//test if moves are available
 	return false;
 }
 
+function newGame(){
+	$(".columntop").empty();
+	board = [[],[],[],[],[],[],[],[]];
+	placeBaseElements();
+	setBoard();
+	placeCards();
+	exposeCard($('.carddiv'));
+}
+
 function placeBaseElements(){
 	//setup free cells
 	for(var i = 0; i<FREE_CELLS; i++){
@@ -443,6 +472,14 @@ function placeCards(){
 	}
 }
 
+function removeDraggable(div){
+	div.draggable("destroy");
+}
+
+function removeDroppables(){
+	$(".droppable").droppable("destroy").removeClass("droppable");
+}
+
 function resetGame(){
 	$(".columntop").empty();
 	placeBaseElements();
@@ -450,13 +487,12 @@ function resetGame(){
 	exposeCard($('.carddiv'));
 }
 
-function newGame(){
-	$(".columntop").empty();
-	board = [[],[],[],[],[],[],[],[]];
-	placeBaseElements();
-	setBoard();
-	placeCards();
-	exposeCard($('.carddiv'));
+function resetStatistics(){
+	wins=0;
+	losses=0;
+	games=0;
+	percentage=0;
+	updateSideBar();
 }
 
 function setBoard(){
@@ -495,14 +531,6 @@ function testForLose(){
 	return false;
 }
 
-function removeDraggable(div){
-	div.draggable("destroy");
-}
-
-function removeDroppables(){
-	$(".droppable").droppable("destroy").removeClass("droppable");
-}
-
 function updateAutoMoveIndex(){
 	//find the lowest card in the wintray, all cards <= card+1 should auto move
 	var index = CARDS_PER_SUIT;
@@ -514,6 +542,18 @@ function updateAutoMoveIndex(){
 	autoMove=index;
 }
 
+function updateSideBar(){
+	$("#games").html(games);
+	$("#wins").html(wins);
+	$("#losses").html(losses);
+	percentage=Math.floor(wins/games);
+	$("#percent").html(percentage);
+
+}
+
 function winner(){
+	games++;
+	wins++;
+	updateSideBar();
 	alert('Standard "You Win!" Dialogue.');
 }

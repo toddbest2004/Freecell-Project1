@@ -41,9 +41,39 @@
 </div>
 <div class="columntop" id="win3">
 </div>
-<div id="instructions">
+<div id="menutogglediv">
+<button class="togglemenu">Show/Hide Menu</button>
+</div>
+<div id="sidebar">
+<div id="buttondiv">
 <button id="reset">Reset Game</button>
 <button id="newgame">Start New Game</button>
+</div>
+<div id="instructions">
+<h3>How to play:</h3>
+Draw cards from the bottom of each column and move them in the following ways:
+<ul>
+<li>From column to free cell. Only one card can occupy each free cell at a time.</li>
+<li>From column to column (or free cell to column). Cards must be placed on a column in descending sequential order, and alternating red and black.</li>
+<li>From column to home cell. Each stack must consist of a single suit, and start with an ace.</li>
+</ul>
+<h3>The Object</h3>
+<p>Create four stacks of 13 cards, one per suit in each of the four home cells. Each stack must be built from the low card (ace) to the high (king).
+</p>
+</div>
+<div id="statistics">
+<h3>Statistics:</h3>
+<ul>
+<li>Games Played: <span id="games">0</span></li>
+<li>Wins: <span id="wins">0</span></li>
+<li>Losses: <span id="losses">0</span></li>
+<li>Win Percent: <span id="percent"></span></li>
+<button id="statistics">Reset Statistics</button>
+</ul>
+</div>
+<div id="bottombuttondiv">
+<button class="togglemenu">Hide Menu</button>
+</div>
 </div>
 </body>
 </html>
