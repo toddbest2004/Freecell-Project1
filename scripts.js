@@ -1,14 +1,12 @@
 /*
 TODO:
-1) win state
-2) lose state
 KNOWN BUGS:
 1) Able to move larger stacks than normal into columns
 2) Some stacks won't be moveable until lower cards are moved
 3) No click, click support, only dragging
 FUTURE TODO LIST:
 1) use local storage to store and load games
-2) game statistics: win/loss ratio
+DONE: 2) game statistics: win/loss ratio
 3) game history: undo/redo moves
 4) move hints: show available moves
 5) if I get really bored, create AI to play game
@@ -20,7 +18,9 @@ const WIN_TRAYS = 4;
 const FREE_CELLS = 4;
 const COLUMNS = 8;
 
+var game = {};
 var board = [[],[],[],[],[],[],[],[]];
+var currentboard = [];
 var validCardMoveTarget = false; //will either be false or the div the card has moved to.
 var autoMove = 0;
 var wins=0;
@@ -30,18 +30,18 @@ var percentage=0;
 
 $(function(){
 	//temporary position setup for divs
-	newGame();
+	loadGame();
 
 	$("#reset").click(function(){
-		resetGame();
 		games++;
 		losses++;
+		resetGame();
 		updateSideBar();
 	});
 	$("#newgame").click(function(){
-		newGame();
 		games++;
 		losses++;
+		newGame();
 		updateSideBar();
 	});
 	$(".togglemenu").click(function(){$("#sidebar").toggle();});
@@ -74,6 +74,14 @@ function cardCanBePlacedOn(movingId, placingId){
 		return true;
 	}
 	return false;
+}
+
+function columnToIdArray(div){
+	var array = [$(div).attr("id")];
+	if($(div).children("div").length>0){
+		return array.concat(columnToIdArray($(div).children("div").first()));
+	}
+	return array;
 }
 
 function doAutoMoves(){
@@ -326,6 +334,24 @@ function isInSequence(div){
 	return false;
 }
 
+function loadGame(){
+	if(localStorage.getItem("freecell")){
+		var game = JSON.parse(localStorage.getItem("freecell"));
+		currentboard=game.currentboard;
+		board=game.board;
+		games=game.games;
+		wins=game.wins;
+		losses=game.losses;
+		updateSideBar();
+		placeBaseElements();
+		placeLoadCards();
+		exposeCard($('.carddiv'));
+		saveGame();
+	}else{
+		newGame();
+	}
+}
+
 function loser(){//a very sad function, with a sad name
 	games++;
 	losses++;
@@ -373,7 +399,7 @@ function moveCardTo(card, div){
 			loser();
 		}
 	}
-
+	saveGame();
 	//TODO: test old parent for auto move to wintray
 	//has to be tested here, since expose card would test cards during card move, not after
 	setTimeout(doAutoMoves, 100);
@@ -426,6 +452,7 @@ function newGame(){
 	setBoard();
 	placeCards();
 	exposeCard($('.carddiv'));
+	saveGame();
 }
 
 function placeBaseElements(){
@@ -472,6 +499,55 @@ function placeCards(){
 	}
 }
 
+function placeLoadCards(){
+	var parent;
+	for(var i=0; i<COLUMNS;i++){
+		parent=$("#col"+i);
+		for(var j=0; j<currentboard[i].length;j++){
+			if(currentboard[i][j]===null){
+				continue;
+			}
+			var cardId = currentboard[i][j];
+			var cardDiv = $("<div></div>").attr("id",cardId);
+			var img;
+			if(j===(currentboard[i].length-1)){
+				cardDiv.addClass("carddiv");
+				img = fullCard("<img>", cardId);
+
+			}else{
+				img = halfCard("<img>", cardId);
+			}
+			cardDiv.append(img);
+			parent.append(cardDiv);
+			parent = parent.children("div").first();
+		}
+	}
+	for(var i=0; i<FREE_CELLS; i++){
+		if(currentboard[i+8]){
+			var parent=$("#cell"+i);
+			var cardId = currentboard[i+8];
+			var cardDiv = $("<div></div>").attr("id",cardId);
+			cardDiv.addClass("carddiv");
+			var img = fullCard("<img>", cardId);
+			cardDiv.append(img);
+			parent.append(cardDiv);
+		}
+	}
+	for(var i=0; i<WIN_TRAYS; i++){
+		var parent=$("#win"+i);
+		for(var j=0; j<currentboard[i+12];j++){
+			var cardId = CARDS_PER_SUIT*i+j;
+			var cardDiv = $("<div></div>").attr("id",cardId);
+			var img = fullCard("<img>", cardId);
+			cardDiv.append(img);
+			cardDiv.removeAttr("style");
+			cardDiv.addClass("topdiv")
+			cardDiv.css({left:0, top:0});
+			parent.append(cardDiv);
+		}
+	}
+}
+
 function removeDraggable(div){
 	div.draggable("destroy");
 }
@@ -485,6 +561,7 @@ function resetGame(){
 	placeBaseElements();
 	placeCards();
 	exposeCard($('.carddiv'));
+	saveGame();
 }
 
 function resetStatistics(){
@@ -493,6 +570,20 @@ function resetStatistics(){
 	games=0;
 	percentage=0;
 	updateSideBar();
+}
+
+function saveGame(){
+	for(var i=0; i<COLUMNS; i++){
+		currentboard[i] = columnToIdArray($("#col"+i).children("div").first());
+	}
+	for(var i=0; i<FREE_CELLS; i++){
+		currentboard[i+8] = $("#cell"+i).children("div").first().attr("id");
+	}
+	for(var i=0; i<WIN_TRAYS; i++){
+		currentboard[i+12] = $("#win"+i).children("div").length;
+	}
+	game = {board:board, currentboard: currentboard, wins: wins, games: games, losses:losses};
+	localStorage.setItem("freecell", JSON.stringify(game));
 }
 
 function setBoard(){
@@ -548,7 +639,6 @@ function updateSideBar(){
 	$("#losses").html(losses);
 	percentage=Math.floor(wins/games);
 	$("#percent").html(percentage);
-
 }
 
 function winner(){
