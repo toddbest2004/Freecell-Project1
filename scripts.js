@@ -194,7 +194,7 @@ function droppableDragStarted(event, ui){
 }
 
 function exposeCard(div){
-	if(!$(div).hasClass("exposedcard")){
+	if(!$(div).hasClass("exposedcard")&&!$(div).hasClass("columntop")){
 		$(div).addClass("exposedcard");
 		makeDraggable($(div));
 		var id = $(div).attr("id");
@@ -396,11 +396,8 @@ function loser(){//a very sad function, with a sad name
 }
 
 function makeDraggable(div){
-	console.log($(div).length);
 	for(var i = 0; i<$(div).length; i++){
-		console.log(i);
 		if(cardCanBePlacedOn($($(div)[i]).attr("id"), $($(div)[i]).parent().attr("id"))){
-			console.log("a");
 			makeDraggable($($(div)[i]).parent());
 		}
 	}
@@ -415,7 +412,7 @@ function makeDroppable(div){
 		activate: function(event, ui){droppableDragStarted(event,ui);},
 		deactivate: function(event, ui){droppableDragEnded(event,ui);},
 		drop: function(event, ui){droppableDragDropped(event,ui);},
-		tolerance: "pointer"
+		tolerance: "touch"
 		});
 	div.addClass("droppable");
 }
@@ -426,7 +423,7 @@ function moveCardTo(card, div, playermove){//playermove is false if player is un
 		addHistory(card, div);
 	}
 	var oldParent = card.parent();
-	if(oldParent.attr("id").indexOf("win")===-1){
+	if(oldParent.attr("id").indexOf("win")===-1&&oldParent.attr("id").indexOf("cell")===-1){
 		exposeCard(oldParent);
 	}
 	card.removeAttr("style");
