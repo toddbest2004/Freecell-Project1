@@ -418,7 +418,9 @@ function moveCardTo(card, div, playermove){//playermove is false if player is un
 		addHistory(card, div);
 	}
 	var oldParent = card.parent();
-	exposeCard(oldParent);
+	if(oldParent.attr("id").indexOf("win")===-1){
+		exposeCard(oldParent);
+	}
 	card.removeAttr("style");
 	$(div).append(card);
 	card.addClass("topdiv");
@@ -597,25 +599,24 @@ function redo(){
 		var fromid = historyArray[historyPoint].to;
 		var movebacker = $("#"+toid).children("div").last();
 		var from = $("#"+fromid);
-		//hideCard(from);
+		hideCard(from);
+		// if(!movebacker.parent().hasClass("columntop")){//if the card has landed on another card, remove .topdiv
+		// 	movebacker.removeClass("topdiv");			 //if the card has landed on a blank column, keep .topdiv
+		// }
+		// if(movebacker.parent().hasClass("exposedcard")){
+		// 	hideCard(movebacker.parent());
+		// }
 		moveCardTo(movebacker, from, false);
-		//movebacker.removeClass("topdiv");
-		if(movebacker.parent().hasClass("exposedcard")){
-			console.log("HERE");
-			hideCard(movebacker.parent());
+
+		movebacker.removeAttr("style");
+		if(!movebacker.parent().hasClass("columntop")){//if the card has landed on another card, remove .topdiv
+			movebacker.removeClass("topdiv");			 //if the card has landed on a blank column, keep .topdiv
 		}
 		historyPoint++;
-			// var oldParent = card.parent();
-			// exposeCard(oldParent);
-			// card.removeAttr("style");
-			// $(div).append(card);
-			// card.addClass("topdiv");
-			// card.css({left:0, top:0});
 	}
 }
 
 function removeDraggable(div){
-	console.log(div)
 	if(div.hasClass("draggable")){
 		div.draggable("destroy");
 	}
@@ -710,8 +711,6 @@ function undo(){
 		}
 		historyPoint--;
 	}
-	
-	console.log(historyPoint);
 }
 
 function updateAutoMoveIndex(){
