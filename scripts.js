@@ -197,8 +197,8 @@ function exposeCard(div){
 	if(!$(div).hasClass("exposedcard")){
 		$(div).addClass("exposedcard");
 		makeDraggable($(div));
-		var id = div.attr("id");
-		var imgElement = div.children("img").first();
+		var id = $(div).attr("id");
+		var imgElement = $(div).children("img").first();
 		fullCard(imgElement, id);
 		$(div).dblclick(function(e){
 			e.stopPropagation();
@@ -396,7 +396,15 @@ function loser(){//a very sad function, with a sad name
 }
 
 function makeDraggable(div){
-	div.draggable({
+	console.log($(div).length);
+	for(var i = 0; i<$(div).length; i++){
+		console.log(i);
+		if(cardCanBePlacedOn($($(div)[i]).attr("id"), $($(div)[i]).parent().attr("id"))){
+			console.log("a");
+			makeDraggable($($(div)[i]).parent());
+		}
+	}
+	$(div).draggable({
 		start: function(event, ui){dragStart(event, ui);},
 		stop: function(event, ui){dragStop(event, ui);},
 		}).addClass("draggable");
@@ -613,6 +621,7 @@ function redo(){
 			movebacker.removeClass("topdiv");			 //if the card has landed on a blank column, keep .topdiv
 		}
 		historyPoint++;
+		saveGame();
 	}
 }
 
@@ -700,8 +709,9 @@ function undo(){
 		var toid = historyArray[historyPoint-1].to;
 		var movebacker = $("#"+toid).children("div").last();
 		var from = $("#"+fromid);
-		hideCard(from);
 		moveCardTo(movebacker, from, false);
+
+		hideCard(from);
 		movebacker.removeClass("topdiv");
 		if(toid.indexOf("win")!==-1){
 			exposeCard(movebacker);
@@ -710,6 +720,7 @@ function undo(){
 			hideCard(movebacker.parent());
 		}
 		historyPoint--;
+		saveGame();
 	}
 }
 
@@ -734,9 +745,11 @@ function updateSideBar(){
 }
 
 function winner(){
-	win=true;
-	games++;
-	wins++;
-	updateSideBar();
-	alert('Standard "You Win!" Dialogue.');
+	if(!win){
+		win=true;
+		games++;
+		wins++;
+		updateSideBar();
+		alert('Standard "You Win!" Dialogue.');
+	}
 }
