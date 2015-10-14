@@ -29,7 +29,9 @@ var games=0;
 var percentage=0;
 var win=false;
 
-//var history = [];
+var historyArray = [];
+var historyPoint = 0;
+
 
 $(function(){
 	//temporary position setup for divs
@@ -57,13 +59,27 @@ $(function(){
 	});
 	$(".togglemenu").click(function(){$("#sidebar").toggle();});
 	$("#statistics").click(resetStatistics);
+	$("#undo").click(undo);
+	$("#redo").click(redo);
 });
+
+function addHistory(mover, to){//history stored as: id of old parent, id of new parent, stack size;
+	while(historyArray.length>historyPoint&&historyArray.length!==0){
+		historyArray.pop();
+	}
+
+	var stacksize = getStackSize(mover);
+	var fromid = mover.parent().attr("id");
+	var toid = to.attr("id");
+	historyArray.push({from:fromid, to:toid, size:stacksize});
+	historyPoint = historyArray.length;
+}
 
 function autoMoveCard(id){
 	var pips = id%CARDS_PER_SUIT;
 	var suit = Math.floor(id/CARDS_PER_SUIT);
 	if($("#win"+suit).children().length===(pips)){
-		moveCardTo($("#"+id), $("#win"+suit));
+		moveCardTo($("#"+id), $("#win"+suit), true);
 		$("#"+id).off('dblclick');
 		return;
 	}
@@ -114,7 +130,7 @@ function doubleClick(div){
 	//test for free cells
 	for(var i = 0; i<FREE_CELLS; i++){
 		if($("#cell"+i).children().length===0){
-			moveCardTo(div, $("#cell"+i));
+			moveCardTo(div, $("#cell"+i), true);
 			return;
 		}
 	}
@@ -141,7 +157,7 @@ function dragStop(event, ui){
 	//test if droppableDragDropped fired, meaning card has been moved
 	//otherwise return back to original location.
 	if(validCardMoveTarget){//change card's parent
-		moveCardTo(card, validCardMoveTarget)
+		moveCardTo(card, validCardMoveTarget, true)
 		validCardMoveTarget=false;
 	}
 
@@ -362,6 +378,8 @@ function loadGame(){
 		wins=game.wins;
 		losses=game.losses;
 		win=game.win;
+		historyArray=game.historyArray;
+		historyPoint=game.historyPoint;
 		updateSideBar();
 		placeBaseElements();
 		placeLoadCards();
@@ -381,7 +399,7 @@ function makeDraggable(div){
 	div.draggable({
 		start: function(event, ui){dragStart(event, ui);},
 		stop: function(event, ui){dragStop(event, ui);},
-		});
+		}).addClass("draggable");
 }
 
 function makeDroppable(div){
@@ -394,13 +412,16 @@ function makeDroppable(div){
 	div.addClass("droppable");
 }
 
-function moveCardTo(card, div){
+function moveCardTo(card, div, playermove){//playermove is false if player is undoing or redoing
 	//TODO: record move (card, div, stacksize) into a history table, for undo/redo
+	if(playermove){
+		addHistory(card, div);
+	}
 	var oldParent = card.parent();
 	exposeCard(oldParent);
 	card.removeAttr("style");
 	$(div).append(card);
-	card.addClass("topdiv")
+	card.addClass("topdiv");
 	card.css({left:0, top:0});
 
 	//if card has moved to wintray, make it unmoveable, and update the index for automoving cards to wintray
@@ -420,7 +441,9 @@ function moveCardTo(card, div){
 	saveGame();
 	//TODO: test old parent for auto move to wintray
 	//has to be tested here, since expose card would test cards during card move, not after
-	setTimeout(doAutoMoves, 100);
+	if(playermove){
+		setTimeout(doAutoMoves, 100);
+	}
 }
 
 function movesAvailable(){//test if moves are available
@@ -471,6 +494,8 @@ function newGame(){
 	placeCards();
 	exposeCard($('.carddiv'));
 	saveGame();
+	historyArray=[];
+	historyPoint=0;
 }
 
 function placeBaseElements(){
@@ -566,8 +591,34 @@ function placeLoadCards(){
 	}
 }
 
+function redo(){
+	if(historyPoint<historyArray.length){//make sure there are moves to redo
+		var toid = historyArray[historyPoint].from;
+		var fromid = historyArray[historyPoint].to;
+		var movebacker = $("#"+toid).children("div").last();
+		var from = $("#"+fromid);
+		//hideCard(from);
+		moveCardTo(movebacker, from, false);
+		//movebacker.removeClass("topdiv");
+		if(movebacker.parent().hasClass("exposedcard")){
+			console.log("HERE");
+			hideCard(movebacker.parent());
+		}
+		historyPoint++;
+			// var oldParent = card.parent();
+			// exposeCard(oldParent);
+			// card.removeAttr("style");
+			// $(div).append(card);
+			// card.addClass("topdiv");
+			// card.css({left:0, top:0});
+	}
+}
+
 function removeDraggable(div){
-	div.draggable("destroy");
+	console.log(div)
+	if(div.hasClass("draggable")){
+		div.draggable("destroy");
+	}
 }
 
 function removeDroppables(){
@@ -580,6 +631,8 @@ function resetGame(){
 	placeCards();
 	exposeCard($('.carddiv'));
 	saveGame();
+	historyArray=[];
+	historyPoint=0;
 }
 
 function resetStatistics(){
@@ -600,7 +653,7 @@ function saveGame(){
 	for(var i=0; i<WIN_TRAYS; i++){
 		currentboard[i+12] = $("#win"+i).children("div").length;
 	}
-	game = {board:board, currentboard: currentboard, wins: wins, games: games, losses:losses, win:win};
+	game = {board:board, currentboard: currentboard, wins: wins, games: games, losses:losses, win:win, historyArray:historyArray, historyPoint:historyPoint};
 	localStorage.setItem("freecell", JSON.stringify(game));
 }
 
@@ -638,6 +691,27 @@ function testForLose(){
 		loser();
 	}
 	return false;
+}
+
+function undo(){
+	if(historyPoint>0){//make sure there are moves to undo
+		var fromid = historyArray[historyPoint-1].from;
+		var toid = historyArray[historyPoint-1].to;
+		var movebacker = $("#"+toid).children("div").last();
+		var from = $("#"+fromid);
+		hideCard(from);
+		moveCardTo(movebacker, from, false);
+		movebacker.removeClass("topdiv");
+		if(toid.indexOf("win")!==-1){
+			exposeCard(movebacker);
+		}
+		if(movebacker.parent().hasClass("exposedcard")){
+			hideCard(movebacker.parent());
+		}
+		historyPoint--;
+	}
+	
+	console.log(historyPoint);
 }
 
 function updateAutoMoveIndex(){
