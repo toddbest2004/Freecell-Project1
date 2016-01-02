@@ -1,4 +1,7 @@
 # WDI-Project1
+
+See it in action: http://toddbest2004.github.io/WDI-Project1/
+
 ##About:
 Created by Todd Best (toddbest2004@gmail.com) on October 14, 2015
 For General Assembly Seattle's Web Development Immersive Program
@@ -12,7 +15,7 @@ I made a deliberate design decision to not use a stored game state during play. 
 
 By using a stored game state, I believe I would be able to make the game more efficient and responsive. The current version uses recursion to traverse the DOM to make some of the move decisions. This is slower than using a simple object/array implementation.
 
-Also, cards and divs undergo numerous class and listener changes during the course of a single card move. Using a stored game state, moves could be recorded and the board could be updated to reflect the changes. I believe this would be more efficient.
+Also, cards and divs undergo numerous class and listener changes during the course of a single card move. Using a stored game state, moves could be recorded and the board could be updated to reflect the changes. I believe this would also be more efficient.
 
 The game uses the browser's localStorage to store gamestate after each move. This state is only accessed on page load to return a player to the previous state of the game.
 

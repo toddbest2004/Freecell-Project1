@@ -1,13 +1,11 @@
 /*
 TODO:
 KNOWN BUGS:
-1) Able to move larger stacks than normal into columns
-2) Some stacks won't be moveable until lower cards are moved
 3) No click, click support, only dragging
 FUTURE TODO LIST:
-1) use local storage to store and load games
+DONE: 1) use local storage to store and load games
 DONE: 2) game statistics: win/loss ratio
-3) game history: undo/redo moves
+DONE: 3) game history: undo/redo moves
 4) move hints: show available moves
 5) if I get really bored, create AI to play game
 */
