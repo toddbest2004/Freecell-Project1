@@ -1,6 +1,6 @@
 # WDI-Project1
 
-See it in action: http://toddbest2004.github.io/WDI-Project1/
+See it in action: http://toddbest2004.github.io/Freecell-Project1/
 
 ##About:
 Created by Todd Best (toddbest2004@gmail.com) on October 14, 2015
